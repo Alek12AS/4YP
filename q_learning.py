@@ -4,10 +4,13 @@ import matplotlib.patches as mpatches
 
 class Agent:
   
-  def __init__(self, lookupTable=None, totalReward=0, gamma=0.9):
-    self.lookupTable = lookupTable   
+  def __init__(self, lookupTable=None, totalReward=0, epsilon=0.1, gamma=0.9):
     if lookupTable == None:
       self.initialise_lookup_tables(gamma)
+    else:
+      self.lookupTable = lookupTable
+
+    self.epsilon = epsilon
 
     self.totalReward = totalReward
     
@@ -23,8 +26,8 @@ class Agent:
 
 class QLearningSimulator:
 
-  def __init__(self, totalAgents=50, gamma=0.9, alpha=0.1, totalIterations=10, epsilon=0.1,\
-  rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
+  def __init__(self, totalAgents=100, gamma=0.9, alpha=0.1, totalIterations=100, epsilon0=0.25,\
+  epsilonDecay=0.999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
     # number of agents N_a 
     self.totalAgents  = totalAgents
@@ -36,7 +39,8 @@ class QLearningSimulator:
     self.totalIterations = totalIterations
 
     # For epsilon greedy
-    self.epsilon = epsilon
+    self.epsilon0 = epsilon0
+    self.epsilonDecay = epsilonDecay
     
     self.rewards_lookup = {'CD':rewardCD, 'DC':rewardDC, 'CC':rewardCC, 'DD':rewardDD}
     
@@ -46,12 +50,12 @@ class QLearningSimulator:
     self.samplePeriod = 10
     self.TDEs = np.zeros((self.agentSampleSize, ((totalAgents-1)*totalIterations)//self.samplePeriod + 1))
     
-    self.agents = agents
-    
-    if self.agents == None:
+    if agents == None:
       self.agents = []
       for i in range(totalAgents):
-        self.agents.append(Agent(gamma=self.gamma))
+        self.agents.append(Agent(epsilon=self.epsilon0, gamma=self.gamma))
+    else:
+      self.agents = agents
 
   def epsilon_greedy_decision(self, priorState, agent):
     if self.agents[agent].lookupTable['D'][priorState] > self.agents[agent].lookupTable['C'][priorState]:
@@ -63,10 +67,13 @@ class QLearningSimulator:
 
     randomNumber = np.random.random_sample()
 
-    if randomNumber <= self.epsilon:
+    if randomNumber <= self.agents[agent].epsilon:
       decision = randomOption
     else:
       decision = greedyOption
+    
+    # Decay epsilon for the agent
+    self.agents[agent].epsilon = self.agents[agent].epsilon * self.epsilonDecay
 
     return decision
 
