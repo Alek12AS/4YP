@@ -4,7 +4,7 @@ import matplotlib.patches as mpatches
 
 class Agent:
   
-  def __init__(self, lookupTable=None, totalReward=0, epsilon=0.1, gamma=0.9):
+  def __init__(self, lookupTable=None, totalReward=0, epsilon=0.1, gamma=0.9, its=0, totalIts=9900):
     if lookupTable == None:
       self.initialise_lookup_tables(gamma)
     else:
@@ -13,9 +13,15 @@ class Agent:
     self.epsilon = epsilon
 
     self.totalReward = totalReward
+
+    # Keeps track of the iteration number for the agent
+    self.its = its
+
+    self.TDE = {'D': {'CC': np.zeros(totalIts), 'CD': np.zeros(totalIts), 'DC': np.zeros(totalIts),\
+       'DD': np.zeros(totalIts), '_': np.zeros(totalIts)},'C': {'CC': np.zeros(totalIts), 'CD':\
+        np.zeros(totalIts), 'DC': np.zeros(totalIts), 'DD': np.zeros(totalIts), '_': np.zeros(totalIts)}}
     
-      
-  
+    
   def initialise_lookup_tables(self, gamma):   
     randVals = np.random.random_sample(10) * 0.5*gamma/(1-gamma)
 
@@ -26,8 +32,8 @@ class Agent:
 
 class QLearningSimulator:
 
-  def __init__(self, totalAgents=100, gamma=0.9, alpha=0.1, totalIterations=100, epsilon0=0.25,\
-  epsilonDecay=0.999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
+  def __init__(self, totalAgents=100, gamma=0.99, alpha=0.1, gameIts=100, epsilon0=0.25,\
+  epsilonDecay=0.9999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
     # number of agents N_a 
     self.totalAgents  = totalAgents
@@ -36,7 +42,7 @@ class QLearningSimulator:
     # learning rate
     self.alpha = alpha
     # total iterations in IPD
-    self.totalIterations = totalIterations
+    self.gameIts = gameIts
 
     # For epsilon greedy
     self.epsilon0 = epsilon0
@@ -48,12 +54,12 @@ class QLearningSimulator:
     self.agentSampleSize = 10
     self.trackedAgents = np.random.choice(self.totalAgents, self.agentSampleSize, False)
     self.samplePeriod = 10
-    self.TDEs = np.zeros((self.agentSampleSize, ((totalAgents-1)*totalIterations)//self.samplePeriod + 1))
+    self.TDEs = np.zeros((self.agentSampleSize, ((totalAgents-1)*gameIts)//self.samplePeriod + 1))
     
     if agents == None:
       self.agents = []
       for i in range(totalAgents):
-        self.agents.append(Agent(epsilon=self.epsilon0, gamma=self.gamma))
+        self.agents.append(Agent(epsilon=self.epsilon0, gamma=self.gamma, totalIts=gameIts*(totalAgents-1)))
     else:
       self.agents = agents
 
@@ -75,50 +81,37 @@ class QLearningSimulator:
     # Decay epsilon for the agent
     self.agents[agent].epsilon = self.agents[agent].epsilon * self.epsilonDecay
 
+    # Increment agent iteration number
+    self.agents[agent].its += 1
+
     return decision
 
   def reset_measurements(self):
     self.stateCount = {'DC':0,'CC':0,'DD':0}
     self.trackedAgent = np.random.randint(0, self.totalAgents)
-    self.TDEs = np.zeros((self.agentSampleSize, ((self.totalAgents-1)*self.totalIterations)//self.samplePeriod + 1))
+    self.TDEs = np.zeros((self.agentSampleSize, ((self.totalAgents-1)*self.gameIts)//self.samplePeriod + 1))
 
-  def collect_TDEs(self, agent1, agent2, deltaQ1, deltaQ2):
-    
-    if agent1 in self.trackedAgents:
-      index = np.where(self.trackedAgents == agent1)
-      if self.TDEs[index,0] % self.samplePeriod == 0:
-        self.TDEs[index, int(self.TDEs[index,0]//self.samplePeriod)] = deltaQ1
-      self.TDEs[index,0] += 1
-
-    if agent2 in self.trackedAgents:
-      index = np.where(self.trackedAgents == agent2)
-      if self.TDEs[index,0] % self.samplePeriod == 0:
-        self.TDEs[index, int(self.TDEs[index,0]//self.samplePeriod + 1)] = deltaQ2
-      self.TDEs[index,0] += 1
 
   def update_lookup_tables(self, newState, priorState, agent1, agent2,\
                           agent1Decision, agent2Decision, agent1Reward, agent2Reward):
-
     maxQb1 = max(self.agents[agent1].lookupTable['D'][newState], self.agents[agent1].lookupTable['C'][newState])
-
     deltaQ1 = self.alpha*(agent1Reward + self.gamma*maxQb1 - self.agents[agent1].lookupTable[agent1Decision][priorState])
     
-    maxQb2 = max(self.agents[agent2].lookupTable['D'][newState[-1::-1]], self.agents[agent2].lookupTable['C'][newState])
-            
+    maxQb2 = max(self.agents[agent2].lookupTable['D'][newState[-1::-1]], self.agents[agent2].lookupTable['C'][newState])        
     deltaQ2 = self.alpha*(agent2Reward + self.gamma*maxQb2 - self.agents[agent2].lookupTable[agent2Decision][priorState[-1::-1]])
 
     self.agents[agent1].lookupTable[agent1Decision][priorState] += deltaQ1
-            
     self.agents[agent2].lookupTable[agent2Decision][priorState[-1::-1]] += deltaQ2
 
-    self.collect_TDEs(agent1, agent2, deltaQ1, deltaQ2)
+    self.agents[agent1].TDE[agent1Decision][priorState][self.agents[agent1].its-1] = deltaQ1
+    self.agents[agent2].TDE[agent2Decision][priorState][self.agents[agent2].its-1] = deltaQ2
 
   def run_simulation(self):
     
     for agent1 in range(self.totalAgents):
       for agent2 in range(agent1+1,self.totalAgents):
         priorState = '_'
-        for i in range(self.totalIterations):
+        for i in range(self.gameIts):
 
           agent1Decision = self.epsilon_greedy_decision(priorState, agent1)
           agent2Decision = self.epsilon_greedy_decision(priorState[-1::-1], agent2)
@@ -145,12 +138,18 @@ class QLearningSimulator:
 
   def disp_TDEs(self):
     
-    totalGames = (self.totalAgents-1)*self.totalIterations//10
-    averagedTDE = np.sum(self.TDEs[:,1:],0)/self.agentSampleSize
+    totalIts = self.gameIts*(self.totalAgents-1)
+    
+    sum = np.zeros(totalIts)
 
-    plt.plot([i for i in range(totalGames)], averagedTDE)
-    plt.xlabel('Iteration # /10')
+    for agent in self.agents:
+      sum = np.add(agent.TDE['C']['CC'],sum)
+
+    mean = np.divide(sum,self.totalAgents)
+
+    plt.plot([i for i in range(totalIts)], mean)
+    plt.xlabel('Iteration')
     plt.ylabel('Mean TDE')
-    plt.title('Mean TDE of a sample of agents over IPD Iterations')
+    plt.title('Mean TDE for CC-C of agents over IPD Iterations')
 
     plt.show()
