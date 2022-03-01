@@ -17,8 +17,7 @@ class Agent:
     # Keeps track of the iteration number for the agent
     self.its = its
 
-    self.TDE = {'D': {'CC': [], 'CD': [], 'DC': [],'DD': [], '_': []},'C': \
-      {'CC': [], 'CD':[], 'DC': [], 'DD': [], '_': []}}
+    self.TDEs = []
     
     
   def initialise_lookup_tables(self, gamma):   
@@ -99,8 +98,8 @@ class QLearningSimulator:
     self.agents[agent1].lookupTable[agent1Decision][priorState] += deltaQ1
     self.agents[agent2].lookupTable[agent2Decision][priorState[-1::-1]] += deltaQ2
 
-    self.agents[agent1].TDE[agent1Decision][priorState].append(deltaQ1)
-    self.agents[agent2].TDE[agent2Decision][priorState].append(deltaQ2)
+    self.agents[agent1].TDEs.append(deltaQ1)
+    self.agents[agent2].TDEs.append(deltaQ2)
 
   def run_simulation(self):
     
@@ -132,13 +131,12 @@ class QLearningSimulator:
 
           priorState = newState
 
-  def get_mean_TDEs(self, decision, state):
+  def get_mean_TDEs(self):
     
-    length = len(agent.TDE[decision][state])
-    sums = np.zeros(length)
+    sums = np.zeros(len(self.agents[0].TDEs))
 
     for agent in self.agents:
-      sums = np.add(np.array(agent.TDE[decision][state]),sums)
+      sums = np.add(np.array(agent.TDEs),sums)
 
     return np.divide(sums,self.totalAgents)
 

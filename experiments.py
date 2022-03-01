@@ -1,7 +1,6 @@
 import numpy as np
 from q_learning import QLearningSimulator
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 class QLearningExperiments:
 
@@ -53,12 +52,13 @@ class QLearningExperiments:
                 meanTDE = threshMeanTDE*2 
                 while tourn < maxTourns and meanTDE > threshMeanTDE:
                     sim.run_simulation()
-                    meanTDE = np.mean(sim.get_mean_TDEs('C', 'CC')[-500])
+                    meanTDEs = sim.get_mean_TDEs()
+                    meanTDE = np.mean(meanTDEs[-500])
                     tourn += 1
         
     def obtain_results(self):
         for i in range(self.repetitions):
-            for sim in range(self.simulations[i]):
+            for sim in self.simulations[i]:
                 sim.reset_measurements()
                 sim.run_simulation()
                 self.stateCounts['DC'][i].append(sim.stateCount['DC'])
@@ -70,14 +70,18 @@ class QLearningExperiments:
         meanCountsCC = np.mean(np.array(self.stateCounts['CC']),0)
         meanCountsDD = np.mean(np.array(self.stateCounts['DD']),0)
 
-        plt.plot(self.paramVals, meanCountsDC, label='DC')
-        plt.plot(self.paramVals, meanCountsCC, label='CC')
-        plt.plot(self.paramVals, meanCountsDD, label='DD')
+        totals = meanCountsDC*2 + meanCountsCC + meanCountsDD
+
+        plt.plot(self.paramVals, meanCountsDC/totals, label='DC')
+        plt.plot(self.paramVals, meanCountsCC/totals, label='CC')
+        plt.plot(self.paramVals, meanCountsDD/totals, label='DD')
 
         plt.xlabel(self.param + 'Value')
         plt.ylabel('State Count')
         plt.title('State Count for Different Values of' + self.param)
         plt.legend()
+
+        plt.show()
 
 
 
