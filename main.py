@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from q_learning import QLearningSimulator
 from q_learn_plus_evo import QLearnPlusEvoSimulator
-from evolution import EvolutionSimulator
-from experiments import QLearningExperiments
+
 
 def main():
     # sim1 = QLearningSimulator()
