@@ -4,11 +4,9 @@ import matplotlib.patches as mpatches
 
 class Agent:
   
-  def __init__(self, lookupTable=None, totalReward=0, epsilon=0.1, gamma=0.9, its=0):
-    if lookupTable == None:
-      self.initialise_lookup_tables(gamma)
-    else:
-      self.lookupTable = lookupTable
+  def __init__(self, lookupTable=None, totalReward=0, epsilon=0.1, its=0):
+    
+    self.lookupTable = lookupTable
 
     self.epsilon = epsilon
 
@@ -18,15 +16,7 @@ class Agent:
     self.its = its
 
     self.TDEs = []
-    
-    
-  def initialise_lookup_tables(self, gamma):   
-    randVals = np.random.random_sample(10) * 0.5*gamma/(1-gamma)
-
-    self.lookupTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
-                  'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
-   
-
+  
 
 class QLearningSimulator:
 
@@ -34,7 +24,12 @@ class QLearningSimulator:
   epsilonDecay=0.9999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
     # number of agents N_a 
-    self.totalAgents  = totalAgents
+    
+    if agents == None:
+      self.totalAgents = totalAgents
+    else:
+      self.totalAgents = len(agents)
+
     # discount factor for future return
     self.gamma = gamma
     # learning rate
@@ -54,11 +49,20 @@ class QLearningSimulator:
     self.samplePeriod = 10
     
     if agents == None:
-      self.agents = []
-      for i in range(totalAgents):
-        self.agents.append(Agent(epsilon=self.epsilon0, gamma=self.gamma))
+      self.create_agents()
     else:
       self.agents = agents
+
+  def create_agents(self):
+    
+    self.agents = []
+    for i in range(self.totalAgents):
+        randVals = np.random.random_sample(10) * 0.5*self.gamma/(1-self.gamma)
+
+        lookupTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
+                  'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
+        
+        self.agents.append(Agent(lookupTable=lookupTable, epsilon=self.epsilon0))
 
   def epsilon_greedy_decision(self, priorState, agent):
     if self.agents[agent].lookupTable['D'][priorState] > self.agents[agent].lookupTable['C'][priorState]:

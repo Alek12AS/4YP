@@ -1,31 +1,22 @@
+from q_learning import Agent
 from random import choice
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Agent:
-    def __init__(self, geneticTable=None, totalReward=0):
-        if geneticTable != None:
-            self.geneticTable = geneticTable
-        else:
-            self.initialise_lookup_tables()
-
-        self.totalReward = totalReward
-
-    def initialise_lookup_tables(self):   
-        randVals = np.random.random_sample(10) * 100
-
-        self.geneticTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
-                'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
-
 
 class EvolutionSimulator:
     
-    def __init__(self, totalGenerations = 100, populationSize=50, totalGames=50,\
+    def __init__(self, totalGenerations = 100, totalAgents=100, gameIts=100,\
         numOfSurvivors=5 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
         self.totalGenerations = totalGenerations
-        self.populationSize = populationSize
-        self.totalGames = totalGames
+        
+        if agents == None:
+            self.totalAgents = totalAgents
+        else:
+            self.totalAgents = len(agents)
+
+        self.gameIts = gameIts
         self.numOfSurvivors = numOfSurvivors
         self.mutationSD = mutationSD
 
@@ -35,9 +26,7 @@ class EvolutionSimulator:
         self.stateCount = {'DC':0,'CC':0,'DD':0}
 
         if agents == None:
-            self.agents = []
-            for i in range(populationSize):
-                self.agents.append(Agent())
+            self.create_agents()
         else:
             self.agents = agents
         
@@ -46,6 +35,16 @@ class EvolutionSimulator:
         # CCCounts = np.zeros(totalGenerations)
         # averageCCCoopProbs = np.zeros(totalGenerations)
 
+    def create_agents(self):
+        self.agents = []
+        for i in range(self.totalAgents):
+            randVals = np.random.random_sample(10) * 100
+
+            lookupTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
+                    'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
+            
+            self.agents.append(Agent(lookupTable=lookupTable, epsilon=self.epsilon0))
+
     def repopulate(self):
         # Sort by score
         self.agents.sort(reverse=True, key=lambda x:x.totalReward)
@@ -53,34 +52,34 @@ class EvolutionSimulator:
         for agent in self.agents:
             agent.totalReward = 0
 
-        for i in range(self.populationSize-self.numOfSurvivors):
+        for i in range(self.totalAgents-self.numOfSurvivors):
             parents = np.random.choice(self.numOfSurvivors,2,False)
 
-            childGeneticTable = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
-            childGeneticTable = self.mutate(childGeneticTable)
+            childlookupTable = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
+            childlookupTable = self.mutate(childlookupTable)
 
-            self.agents[self.numOfSurvivors + i].geneticTable = childGeneticTable
+            self.agents[self.numOfSurvivors + i].lookupTable = childlookupTable
     
 
     def crossover(self, parent1, parent2):
-        childGeneticTable = parent1.lookupTable
+        childlookupTable = parent1.lookupTable
         
-        for action in childGeneticTable:
-            for state in childGeneticTable[action]:
+        for action in childlookupTable:
+            for state in childlookupTable[action]:
                 sample = np.random.choice(1)
                 if sample == 1:
-                    childGeneticTable[action][state] = parent2.lookupTable[action][state]
+                    childlookupTable[action][state] = parent2.lookupTable[action][state]
 
-        return childGeneticTable
+        return childlookupTable
 
-    def mutate(self, childGeneticTable):
+    def mutate(self, childlookupTable):
 
-        for action in childGeneticTable:
-            for state in childGeneticTable[action]:
-                param = np.random.normal(childGeneticTable[action][state], self.mutationSD)
-                childGeneticTable[action][state] = param
+        for action in childlookupTable:
+            for state in childlookupTable[action]:
+                param = np.random.normal(childlookupTable[action][state], self.mutationSD)
+                childlookupTable[action][state] = param
         
-        return childGeneticTable
+        return childlookupTable
 
     def select_action(self, agentIndex, priorState):
 
@@ -93,10 +92,10 @@ class EvolutionSimulator:
         self.stateCount = {'DC':0,'CC':0,'DD':0}
 
     def run_simulation(self):
-        for agent1 in range(self.populationSize):
-            for agent2 in range(agent1+1,self.populationSize):
+        for agent1 in range(self.totalAgents):
+            for agent2 in range(agent1+1,self.totalAgents):
                 priorState = '_'
-                for g in range(self.totalGames):
+                for g in range(self.gameIts):
                     agent1Action = self.select_action(agent1, priorState)
                     agent2Action = self.select_action(agent2, priorState[::-1])
                 
