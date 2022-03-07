@@ -1,3 +1,4 @@
+from random import choice
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -6,19 +7,23 @@ class Agent:
         if geneticTable != None:
             self.geneticTable = geneticTable
         else:
-            self.probs = np.random.random_sample(5) * 100
-            self.geneticTable = {'_':self.probs[0], 'CD':self.probs[1], 'DC':self.probs[2], 'CC':self.probs[3],\
-                'DD':self.probs[4]}
+            self.initialise_lookup_tables()
 
         self.totalReward = totalReward
 
+    def initialise_lookup_tables(self):   
+        randVals = np.random.random_sample(10) * 100
+
+        self.geneticTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
+                'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
+
+
 class EvolutionSimulator:
     
-    def __init__(self, totalGenerations = 100, maxMutationSize=5, populationSize=50, totalGames=50,\
-        numOfSurvivors=5 , mutationSD=10, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
+    def __init__(self, totalGenerations = 100, populationSize=50, totalGames=50,\
+        numOfSurvivors=5 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
         self.totalGenerations = totalGenerations
-        self.maxMutationSize = maxMutationSize
         self.populationSize = populationSize
         self.totalGames = totalGames
         self.numOfSurvivors = numOfSurvivors
@@ -51,44 +56,35 @@ class EvolutionSimulator:
         for i in range(self.populationSize-self.numOfSurvivors):
             parents = np.random.choice(self.numOfSurvivors,2,False)
 
-            childProbs = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
-            childGeneticTable = self.mutate(childProbs)
+            childGeneticTable = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
+            childGeneticTable = self.mutate(childGeneticTable)
 
             self.agents[self.numOfSurvivors + i].geneticTable = childGeneticTable
     
 
     def crossover(self, parent1, parent2):
-        childProbs = np.zeros(5) 
-        for i in range(5):
-        # perform uniform crossover
-            sample = np.random.choice(1)
-            if sample == 1:
-                childProbs[i] = list(parent1.geneticTable.values())[i]
-            else:
-                childProbs[i] = list(parent2.geneticTable.values())[i]
-
-        return childProbs
-
-    def mutate(self, childProbs):
-        probs = childProbs
-        for i in range(5):
-            prob = np.random.normal(childProbs[i], self.mutationSD)
-            if prob > 100:
-                prob = 100
-            elif prob < 0:
-                prob = 0
+        childGeneticTable = parent1.lookupTable
         
-            probs[i] = prob
+        for action in childGeneticTable:
+            for state in childGeneticTable[action]:
+                sample = np.random.choice(1)
+                if sample == 1:
+                    childGeneticTable[action][state] = parent2.lookupTable[action][state]
 
-        childGeneticTable = {'_':probs[0], 'CD':probs[1], 'DC':probs[2], 'CC':probs[3],\
-            'DD':probs[4]}
+        return childGeneticTable
+
+    def mutate(self, childGeneticTable):
+
+        for action in childGeneticTable:
+            for state in childGeneticTable[action]:
+                param = np.random.normal(childGeneticTable[action][state], self.mutationSD)
+                childGeneticTable[action][state] = param
         
         return childGeneticTable
 
     def select_action(self, agentIndex, priorState):
-        probCoop = self.agents[agentIndex].geneticTable[priorState]
-        
-        if  np.random.uniform()*100 <= probCoop:
+
+        if self.agents[agentIndex]['C'][priorState] >= self.agents[agentIndex]['D'][priorState]:
             return 'C'
         else:
             return 'D'
