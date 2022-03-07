@@ -66,7 +66,8 @@ class EvolutionSimulator:
         
         for action in childlookupTable:
             for state in childlookupTable[action]:
-                sample = np.random.choice(1)
+                sample = np.random.choice(2)
+                print(sample)
                 if sample == 1:
                     childlookupTable[action][state] = parent2.lookupTable[action][state]
 
@@ -78,6 +79,7 @@ class EvolutionSimulator:
             for state in childlookupTable[action]:
                 param = np.random.normal(childlookupTable[action][state], self.mutationSD)
                 childlookupTable[action][state] = param
+        
         
         return childlookupTable
 

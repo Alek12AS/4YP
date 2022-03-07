@@ -24,7 +24,7 @@ class QLearningSimulator:
   epsilonDecay=0.9999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
     # number of agents N_a 
-    
+
     if agents == None:
       self.totalAgents = totalAgents
     else:
@@ -134,7 +134,7 @@ class QLearningSimulator:
             self.stateCount[newState] += 1
 
           priorState = newState
-
+    
   def get_mean_TDEs(self):
     
     sums = np.zeros(len(self.agents[0].TDEs))
