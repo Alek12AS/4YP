@@ -1,4 +1,3 @@
-from re import A
 import numpy as np
 from q_learning import QLearningSimulator
 import matplotlib.pyplot as plt
@@ -15,7 +14,7 @@ class QLearningExperiments:
 
     
         self.simulations = [[]]*repetitions
-
+        
         if param == 'Gamma':
             for i in range(repetitions):
                 for g in paramVals:
@@ -41,11 +40,13 @@ class QLearningExperiments:
                         epsilon0=epsilon0,epsilonDecay=epsilonDecay,rewardCD=rewardCD, rewardDC=rewardDC, rewardCC=rewardCC,\
                         rewardDD=rewardDD, agents=agents))
         
+        numParams = len(self.paramVals)
 
-        self.stateCounts = {'DC':[[]]*repetitions,'CC':[[]]*repetitions,'DD':[[]]*repetitions}
-        self.numTit4Tat = [[]]*self.repetitions
-        self.numCooperators = [[]]*self.repetitions
-        self.numDefectors = [[]]*self.repetitions
+        self.stateCounts = {'DC':[[0]*numParams]*repetitions,'CC':[[0]*numParams]*repetitions,\
+            'DD':[[0]*numParams]*repetitions}
+        self.numTit4Tat = [[0]*numParams]*self.repetitions
+        self.numCooperators = [[0]*numParams]*self.repetitions
+        self.numDefectors = [[0]*numParams]*self.repetitions
         
 
     def train_populations(self, maxTourns=10, threshMeanTDE=0.01):
@@ -56,7 +57,7 @@ class QLearningExperiments:
                 while tourn < maxTourns and meanTDE > threshMeanTDE:
                     sim.run_simulation()
                     meanTDEs = sim.get_mean_TDEs()
-                    meanTDE = np.mean(meanTDEs[-500])
+                    meanTDE = np.mean(meanTDEs[-1000])
                     tourn += 1
 
     def strat_classifier(self, LT):
@@ -79,21 +80,21 @@ class QLearningExperiments:
         
     def obtain_results(self):
         for i in range(self.repetitions):
-            for sim in self.simulations[i]:
-                sim.reset_measurements()
-                sim.run_simulation()
-                self.stateCounts['DC'][i].append(sim.stateCount['DC'])
-                self.stateCounts['CC'][i].append(sim.stateCount['CC'])
-                self.stateCounts['DD'][i].append(sim.stateCount['DD'])
+            for s in range(len(self.paramVals)):
+                self.simulations[i][s].reset_measurements()
+                self.simulations[i][s].run_simulation()
+                self.stateCounts['DC'][i][s] = self.simulations[i][s].stateCount['DC']
+                self.stateCounts['CC'][i][s] = self.simulations[i][s].stateCount['CC']
+                self.stateCounts['DD'][i][s] = self.simulations[i][s].stateCount['DD']
 
-                for agent in sim.agents:
+                for agent in self.simulations[i][s].agents:
                     classif = self.strat_classifier(agent.lookupTable)
                     if classif == 'cooperator':
-                        self.numCooperators[i] += 1
+                        self.numCooperators[i][s] += 1
                     elif classif == 'defector':
-                        self.numDefectors[i] += 1
+                        self.numDefectors[i][s] += 1
                     elif classif == 'tit4tat':
-                        self.numTit4Tat[i] += 1
+                        self.numTit4Tat[i][s] += 1
                     
     def output_results(self):
         meanCountsDC = np.mean(np.array(self.stateCounts['DC']),0)
@@ -105,15 +106,31 @@ class QLearningExperiments:
 
         for val in self.paramVals:
             print(val, end=' ')
-        print(' ')
+        print('')
+        print('DC counts')
         for n in meanCountsDC:
             print(n, end=' ')
         print('')
+        print('CC count')
         for n in meanCountsCC:
             print(n, end=' ')
         print('')
+        print('DD count')
         for n in meanCountsDD:
             print(n, end=' ')
+        print('')
+        print('Num of Cooperators')
+        for n in meanNumCooperators:
+            print(n, end=' ')
+        print('')
+        print('Num of Defectors')
+        for n in meanNumDefectors:
+            print(n, end=' ')
+        print('')
+        print('Num of tit4tat')
+        for n in meanNumTit4Tat:
+            print(n, end=' ')
+        print('')
 
 
     

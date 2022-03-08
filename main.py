@@ -1,41 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from q_learn_plus_evo import QLearnPlusEvoSimulator
-
+from experiments import QLearningExperiments
+from evolution_experiments import EvolutionExperiments
 
 def main():
-    # sim1 = QLearningSimulator()
-    # sim1.run_simulation()
-    # sim1.disp_TDEs()
+   
+    # g1 = np.linspace(0,1,20,False)
+    # g2 = np.linspace(0.99,1,5,False)
+    # g3 = np.linspace(0.999,1,5,False)
+    # g4 = np.linspace(0.9999,1,5,False)
 
-    # evo1 = EvolutionSimulator()
-    # evo1.run_simulation()
-    # print(evo1.stateCount)
-    # gammaVals = np.arange(0.5,1,0.01)
+    # gammaVals = np.concatenate((g1, g2, g3, g4))
     
-
-    # Qexp = QLearningExperiments(totalAgents=50, gameIts=50, param='Gamma',\
-    #      paramVals=gammaVals)
+    # Qexp = QLearningExperiments(param='Gamma', paramVals=gammaVals)
 
     # Qexp.train_populations()
     # Qexp.obtain_results()
-    # Qexp.disp_results()
-    
-    counts = []
+    # Qexp.output_results()
 
-    qLearnPlusEvo = QLearnPlusEvoSimulator(mutationSD=1)
-    
-    for i in range(15):
-        qLearnPlusEvo.run_simulation()
-        counts.append(qLearnPlusEvo.stateCount['CC'])
-        qLearnPlusEvo.reset_measurements()
-        
+    popSizes = [10,50,100,200]
 
-    plt.plot([i for i in range(15)], counts)
-    plt.ylabel('Number of CC states')
-    plt.xlabel('Generation Number')
-    plt.show()
-
+    evoExp = EvolutionExperiments(totalGenerations=10, paramVals=popSizes)
+    evoExp.obtain_results()
+    evoExp.output_results()
 
 if __name__ == "__main__":
     main()

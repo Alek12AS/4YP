@@ -43,7 +43,7 @@ class EvolutionSimulator:
             lookupTable = {'D': {'CC': randVals[0], 'CD': randVals[1], 'DC': randVals[2], 'DD': randVals[3], '_': randVals[4]},
                     'C': {'CC': randVals[5], 'CD': randVals[6], 'DC': randVals[7], 'DD': randVals[8], '_': randVals[9]}}
             
-            self.agents.append(Agent(lookupTable=lookupTable, epsilon=self.epsilon0))
+            self.agents.append(Agent(lookupTable=lookupTable))
 
     def repopulate(self):
         # Sort by score
@@ -67,7 +67,6 @@ class EvolutionSimulator:
         for action in childlookupTable:
             for state in childlookupTable[action]:
                 sample = np.random.choice(2)
-                print(sample)
                 if sample == 1:
                     childlookupTable[action][state] = parent2.lookupTable[action][state]
 
@@ -85,7 +84,8 @@ class EvolutionSimulator:
 
     def select_action(self, agentIndex, priorState):
 
-        if self.agents[agentIndex]['C'][priorState] >= self.agents[agentIndex]['D'][priorState]:
+        if self.agents[agentIndex].lookupTable['C'][priorState] >=\
+             self.agents[agentIndex].lookupTable['D'][priorState]:
             return 'C'
         else:
             return 'D'
