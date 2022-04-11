@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 class EvolutionSimulator:
     
     def __init__(self, totalGenerations = 100, totalAgents=100, gameIts=100,\
-        numOfSurvivors=5 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
+        survivalRate=0.05 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
         self.totalGenerations = totalGenerations
         
@@ -16,10 +16,15 @@ class EvolutionSimulator:
         else:
             self.totalAgents = len(agents)
 
+        
         self.gameIts = gameIts
-        self.numOfSurvivors = numOfSurvivors
-        self.mutationSD = mutationSD
 
+        
+        self.numOfSurvivors = int(round(self.totalAgents*survivalRate))
+        if self.numOfSurvivors < 2:
+            self.numOfSurvivors = 2
+
+        self.mutationSD = mutationSD
 
         self.rewardsLookup = {'CD':rewardCD, 'DC':rewardDC, 'CC':rewardCC, 'DD':rewardDD}
 
@@ -84,8 +89,12 @@ class EvolutionSimulator:
 
     def select_action(self, agentIndex, priorState):
 
-        if self.agents[agentIndex].lookupTable['C'][priorState] >=\
-             self.agents[agentIndex].lookupTable['D'][priorState]:
+        coopVal = self.agents[agentIndex].lookupTable['C'][priorState]
+        defVal = self.agents[agentIndex].lookupTable['D'][priorState]
+        probCoop = coopVal/(coopVal+defVal)
+        sample = np.random.random_sample()
+
+        if sample <= probCoop:
             return 'C'
         else:
             return 'D'

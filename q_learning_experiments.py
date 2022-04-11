@@ -1,6 +1,8 @@
+from unicodedata import decomposition
 import numpy as np
 from q_learning import QLearningSimulator
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 class QLearningExperiments:
 
@@ -47,6 +49,8 @@ class QLearningExperiments:
         self.numTit4Tat = [[0]*numParams]*self.repetitions
         self.numCooperators = [[0]*numParams]*self.repetitions
         self.numDefectors = [[0]*numParams]*self.repetitions
+
+        self.reducedParams = [[]]*self.repetitions
         
 
     def train_populations(self, maxTourns=10, threshMeanTDE=0.01):
@@ -76,7 +80,18 @@ class QLearningExperiments:
                 and LT['C']['_'] > LT['D']['_']:
             return 'tit4tat'
 
+    def dim_reduction(self, agents):
+        points = []
+        for agent in agents:
+            params = list(agent.lookupTable['D'].values()) + list(agent.lookupTable['C'].values())
+            points.append(params)
         
+        pca = PCA(n_components=2)
+        pca.fit(points)
+        
+        return pca.fit_transform(points)
+
+
         
     def obtain_results(self):
         for i in range(self.repetitions):
@@ -95,6 +110,10 @@ class QLearningExperiments:
                         self.numDefectors[i][s] += 1
                     elif classif == 'tit4tat':
                         self.numTit4Tat[i][s] += 1
+
+                self.reducedParams[i].append(self.dim_reduction(self.simulations[i][s].agents)) 
+
+            
                     
     def output_results(self):
         meanCountsDC = np.mean(np.array(self.stateCounts['DC']),0)
@@ -104,10 +123,23 @@ class QLearningExperiments:
         meanNumDefectors = np.mean(np.array(self.numDefectors),0)
         meanNumTit4Tat = np.mean(np.array(self.numTit4Tat),0)
 
+
         for val in self.paramVals:
             print(val, end=' ')
         print('')
         print('DC counts')
+
+        print('Reduced Params')
+        for params in self.reducedParams[0]:
+            print('x')
+            for point in params:
+                print(point[0], end=' ')
+            print('y')
+            for point in params:
+                print(point[1], end=' ')
+        print('')
+
+        print('DC count')
         for n in meanCountsDC:
             print(n, end=' ')
         print('')

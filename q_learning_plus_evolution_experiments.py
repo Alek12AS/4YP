@@ -1,13 +1,14 @@
-from evolution import EvolutionSimulator
+from q_learning_plus_evo import QLearnPlusEvoSimulator
 
 class EvolutionExperiments:
 
-    def __init__(self, totalGenerations = 100, totalAgents=100, gameIts=10,\
-        survivalRate=0.05 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1,\
-             param='Population Size', paramVals=None, repetitions=1, agents=None):
+    def __init__(self, totalGenerations, param='Population Size', paramVals=None, repetitions=1,\
+         populationSize=100, gamma=0.99, alpha=0.1, gameIts=100, epsilon0=0.25, epsilonDecay=0.9999,\
+             rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, survivalRate=0.05, mutationSD=2.5,\
+                 agents=None):
 
         self.totalGenerations = totalGenerations
-        self.totalAgents = totalAgents
+        self.populationSize = populationSize
 
         self.paramVals = paramVals
         self.param = param
@@ -17,8 +18,9 @@ class EvolutionExperiments:
         
         if param == 'Population Size':
             for popSize in paramVals:
-                self.simulations.append(EvolutionSimulator(totalGenerations, popSize, gameIts,\
-                    survivalRate, mutationSD, rewardCD, rewardDC, rewardCC, rewardDD, agents))
+                self.simulations.append(EvolutionExperiments(popSize, gamma, alpha, gameIts, epsilon0,\
+                epsilonDecay, rewardCD, rewardDC, rewardCC, rewardDD, survivalRate, mutationSD,\
+                     agents))
         
         numParams = len(self.paramVals)
 
@@ -66,8 +68,8 @@ class EvolutionExperiments:
                         self.numTit4Tat[i][genNum] += 1
                     
     def output_results(self):
+        f = open("QLearning_plus_Evo_results.txt", "a")
         for i in range(len(self.paramVals)):
-            f = open("results.txt", "a")
             f.write('\n')
             f.write('\n')
             f.write(self.param+': '+str(self.paramVals[i]))
@@ -96,5 +98,4 @@ class EvolutionExperiments:
             f.write('Number of Tit4Tat Players')
             f.write('\n')
             f.write(' '.join(map(str,self.numTit4Tat[i])))
-            f.close()
-        
+        f.close()
