@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from q_learning_experiments import QLearningExperiments
 from evolution_experiments import EvolutionExperiments
-from q_learning_plus_evolution_experiments import EvolutionExperiments
+from q_learning_plus_evolution_experiments import QLearningPlusEvolutionExperiments
 import time
 
 def main():
@@ -27,7 +27,7 @@ def main():
     # evoExp.output_results()
     # print("--- %s seconds ---" % (time.time() - startTime))
     
-    evoPlusQ = EvolutionExperiments(totalGenerations=100, paramVals=popSizes)
+    evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
     evoPlusQ.obtain_results()
     evoPlusQ.output_results()
     print("--- %s seconds ---" % (time.time() - startTime))

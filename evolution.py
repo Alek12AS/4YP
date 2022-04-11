@@ -106,7 +106,7 @@ class EvolutionSimulator:
         for agent1 in range(self.totalAgents):
             for agent2 in range(agent1+1,self.totalAgents):
                 priorState = '_'
-                for g in range(self.gameIts):
+                for i in range(self.gameIts):
                     agent1Action = self.select_action(agent1, priorState)
                     agent2Action = self.select_action(agent2, priorState[::-1])
                 
@@ -116,12 +116,11 @@ class EvolutionSimulator:
                     self.agents[agent2].totalReward += self.rewardsLookup[newState[-1::-1]]
                     
 
-                if newState == 'CD':
-                    self.stateCount['DC'] += 1
-                else:
-                    self.stateCount[newState] += 1
+                    if newState == 'CD':
+                        self.stateCount['DC'] += 1
+                    else:
+                        self.stateCount[newState] += 1
         
-                priorState = newState
+                    priorState = newState
             
-            self.agentTable = self.repopulate()
 

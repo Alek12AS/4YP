@@ -1,9 +1,9 @@
 from q_learning_plus_evo import QLearnPlusEvoSimulator
 
-class EvolutionExperiments:
+class QLearningPlusEvolutionExperiments:
 
-    def __init__(self, totalGenerations, param='Population Size', paramVals=None, repetitions=1,\
-         populationSize=100, gamma=0.99, alpha=0.1, gameIts=100, epsilon0=0.25, epsilonDecay=0.9999,\
+    def __init__(self, totalGenerations, param='Population_Size', paramVals=None, repetitions=1,\
+         populationSize=100, gamma=0.99, alpha=0.1, gameIts=10, epsilon0=0.25, epsilonDecay=0.9999,\
              rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, survivalRate=0.05, mutationSD=2.5,\
                  agents=None):
 
@@ -16,9 +16,9 @@ class EvolutionExperiments:
 
         self.simulations = []
         
-        if param == 'Population Size':
+        if param == 'Population_Size':
             for popSize in paramVals:
-                self.simulations.append(EvolutionExperiments(popSize, gamma, alpha, gameIts, epsilon0,\
+                self.simulations.append(QLearnPlusEvoSimulator(popSize, gamma, alpha, gameIts, epsilon0,\
                 epsilonDecay, rewardCD, rewardDC, rewardCC, rewardDD, survivalRate, mutationSD,\
                      agents))
         
@@ -52,7 +52,6 @@ class EvolutionExperiments:
     def obtain_results(self):
         for i in range(len(self.paramVals)):
             for genNum in range(self.totalGenerations):
-                self.simulations[i].reset_measurements()
                 self.simulations[i].run_simulation()
                 self.stateCounts['DC'][i][genNum] = self.simulations[i].stateCount['DC']
                 self.stateCounts['CC'][i][genNum] = self.simulations[i].stateCount['CC']
@@ -66,6 +65,9 @@ class EvolutionExperiments:
                         self.numDefectors[i][genNum] += 1
                     elif classif == 'tit4tat':
                         self.numTit4Tat[i][genNum] += 1
+                
+                self.simulations[i].reset_measurements()
+                self.simulations[i].repopulate()
                     
     def output_results(self):
         f = open("QLearning_plus_Evo_results.txt", "a")
@@ -74,28 +76,22 @@ class EvolutionExperiments:
             f.write('\n')
             f.write(self.param+': '+str(self.paramVals[i]))
             f.write('\n')
-            f.write('DC')
-            f.write('\n')
+            f.write('DC_Count: ')
             f.write(' '.join(map(str,self.stateCounts['DC'][i])))
             f.write('\n')
-            f.write('CC')
-            f.write('\n')
+            f.write('CC_Count: ')
             f.write(' '.join(map(str,self.stateCounts['CC'][i])))
             f.write('\n')
-            f.write('DD')
-            f.write('\n')
+            f.write('DD_Count: ')
             f.write(' '.join(map(str,self.stateCounts['DD'][i])))
             f.write('\n')
             
-            f.write('Number of Cooperators')
-            f.write('\n')
+            f.write('Number_of_Cooperators: ')
             f.write(' '.join(map(str,self.numCooperators[i])))
             f.write('\n')
-            f.write('Number of Defectors')
-            f.write('\n')
+            f.write('Number_of_Defectors: ')
             f.write(' '.join(map(str,self.numDefectors[i])))
             f.write('\n')
-            f.write('Number of Tit4Tat Players')
-            f.write('\n')
+            f.write('Number_of_Tit4Tat_Players: ')
             f.write(' '.join(map(str,self.numTit4Tat[i])))
         f.close()

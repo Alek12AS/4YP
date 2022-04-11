@@ -4,7 +4,7 @@ class EvolutionExperiments:
 
     def __init__(self, totalGenerations = 100, totalAgents=100, gameIts=10,\
         survivalRate=0.05 , mutationSD=5, rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1,\
-             param='Population Size', paramVals=None, repetitions=1, agents=None):
+             param='Population_Size', paramVals=None, repetitions=1, agents=None):
 
         self.totalGenerations = totalGenerations
         self.totalAgents = totalAgents
@@ -15,7 +15,7 @@ class EvolutionExperiments:
 
         self.simulations = []
         
-        if param == 'Population Size':
+        if param == 'Population_Size':
             for popSize in paramVals:
                 self.simulations.append(EvolutionSimulator(totalGenerations, popSize, gameIts,\
                     survivalRate, mutationSD, rewardCD, rewardDC, rewardCC, rewardDD, agents))
@@ -50,7 +50,6 @@ class EvolutionExperiments:
     def obtain_results(self):
         for i in range(len(self.paramVals)):
             for genNum in range(self.totalGenerations):
-                self.simulations[i].reset_measurements()
                 self.simulations[i].run_simulation()
                 self.stateCounts['DC'][i][genNum] = self.simulations[i].stateCount['DC']
                 self.stateCounts['CC'][i][genNum] = self.simulations[i].stateCount['CC']
@@ -64,37 +63,34 @@ class EvolutionExperiments:
                         self.numDefectors[i][genNum] += 1
                     elif classif == 'tit4tat':
                         self.numTit4Tat[i][genNum] += 1
+                
+                self.simulations[i].repopulate()
+                self.simulations[i].reset_measurements()
                     
     def output_results(self):
+        f = open("evolution_results.txt", "a")
         for i in range(len(self.paramVals)):
-            f = open("results.txt", "a")
             f.write('\n')
             f.write('\n')
             f.write(self.param+': '+str(self.paramVals[i]))
             f.write('\n')
-            f.write('DC')
-            f.write('\n')
+            f.write('DC_Count: ')
             f.write(' '.join(map(str,self.stateCounts['DC'][i])))
             f.write('\n')
-            f.write('CC')
-            f.write('\n')
+            f.write('CC_Count: ')
             f.write(' '.join(map(str,self.stateCounts['CC'][i])))
             f.write('\n')
-            f.write('DD')
-            f.write('\n')
+            f.write('DD_Count: ')
             f.write(' '.join(map(str,self.stateCounts['DD'][i])))
             f.write('\n')
             
-            f.write('Number of Cooperators')
-            f.write('\n')
+            f.write('Number_of_Cooperators: ')
             f.write(' '.join(map(str,self.numCooperators[i])))
             f.write('\n')
-            f.write('Number of Defectors')
-            f.write('\n')
+            f.write('Number_of_Defectors: ')
             f.write(' '.join(map(str,self.numDefectors[i])))
             f.write('\n')
-            f.write('Number of Tit4Tat Players')
-            f.write('\n')
+            f.write('Number_of_Tit4Tat_Players: ')
             f.write(' '.join(map(str,self.numTit4Tat[i])))
-            f.close()
+        f.close()
         
