@@ -20,17 +20,16 @@ def main():
     # Qexp.obtain_results()
     # Qexp.output_results()
 
-    popSizes = [100]
+    popSizes = [20]
 
-    # evoExp = EvolutionExperiments(totalGenerations=100, paramVals=popSizes)
-    # evoExp.obtain_results()
-    # evoExp.output_results()
-    # print("--- %s seconds ---" % (time.time() - startTime))
-    
-    evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
-    evoPlusQ.obtain_results()
-    evoPlusQ.output_results()
+    evoExp = EvolutionExperiments(totalGenerations=10, paramVals=popSizes)
+    evoExp.obtain_results()
     print("--- %s seconds ---" % (time.time() - startTime))
+    
+    # evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
+    # evoPlusQ.obtain_results()
+    # evoPlusQ.output_results()
+    # print("--- %s seconds ---" % (time.time() - startTime))
 
 if __name__ == "__main__":
     main()

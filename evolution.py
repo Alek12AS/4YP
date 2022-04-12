@@ -31,6 +31,7 @@ class EvolutionSimulator:
         self.stateCount = {'DC':0,'CC':0,'DD':0}
 
         if agents == None:
+            self.agents = []
             self.create_agents()
         else:
             self.agents = agents
@@ -41,7 +42,6 @@ class EvolutionSimulator:
         # averageCCCoopProbs = np.zeros(totalGenerations)
 
     def create_agents(self):
-        self.agents = []
         for i in range(self.totalAgents):
             randVals = np.random.random_sample(10) * 100
 
@@ -61,37 +61,42 @@ class EvolutionSimulator:
             parents = np.random.choice(self.numOfSurvivors,2,False)
 
             childlookupTable = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
-            childlookupTable = self.mutate(childlookupTable)
+            self.mutate(childlookupTable)
 
             self.agents[self.numOfSurvivors + i].lookupTable = childlookupTable
     
 
     def crossover(self, parent1, parent2):
-        childlookupTable = parent1.lookupTable
+        childlookupTable = {'D': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0, '_': 0},\
+                    'C': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0, '_': 0}}
         
         for action in childlookupTable:
             for state in childlookupTable[action]:
                 sample = np.random.choice(2)
                 if sample == 1:
+                    childlookupTable[action][state] = parent1.lookupTable[action][state]
+                else:
                     childlookupTable[action][state] = parent2.lookupTable[action][state]
 
         return childlookupTable
 
     def mutate(self, childlookupTable):
-
         for action in childlookupTable:
             for state in childlookupTable[action]:
                 param = np.random.normal(childlookupTable[action][state], self.mutationSD)
+                if param < 0:
+                    param = 0
                 childlookupTable[action][state] = param
-        
-        
-        return childlookupTable
 
     def select_action(self, agentIndex, priorState):
 
         coopVal = self.agents[agentIndex].lookupTable['C'][priorState]
         defVal = self.agents[agentIndex].lookupTable['D'][priorState]
-        probCoop = coopVal/(coopVal+defVal)
+        if coopVal+defVal == 0:
+            probCoop = 0.5
+        else:
+            probCoop = coopVal/(coopVal+defVal)
+            
         sample = np.random.random_sample()
 
         if sample <= probCoop:
