@@ -29,6 +29,7 @@ class QLearningPlusEvolutionExperiments:
         self.numTit4Tat = [[0]*totalGenerations]*numParams
         self.numCooperators = [[0]*totalGenerations]*numParams
         self.numDefectors = [[0]*totalGenerations]*numParams
+
         
 
 

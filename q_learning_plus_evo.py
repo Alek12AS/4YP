@@ -21,8 +21,5 @@ class QLearnPlusEvoSimulator(QLearningSimulator, EvolutionSimulator):
         
     def run_simulation(self):
         QLearningSimulator.run_simulation(self)
-        
-        
-
 
   

@@ -13,28 +13,26 @@ class EvolutionExperiments:
         self.mutationSD = mutationSD
         self.gameIterations = gameIts
         self.survivalRate = survivalRate
-
+        self.rewardCD= rewardCD
+        self.rewardDC= rewardDC
+        self.rewardCC= rewardCC
+        self.rewardDD= rewardDD
+        self.agents = agents
         self.paramVals = paramVals
         self.param = param
         self.repetitions = repetitions
 
         self.simulations = []
 
-        self.lookupTables = []
-        self.rewards = []
+        self.initialise_simulations()
         
-        if param == 'Population_Size':
-            for popSize in paramVals:
-                self.simulations.append(EvolutionSimulator(totalGenerations, popSize, gameIts,\
-                    survivalRate, mutationSD, rewardCD, rewardDC, rewardCC, rewardDD, agents))
-        
-        numParams = len(self.paramVals)
-
-
-        self.numTit4Tat = [[0]*totalGenerations]*numParams
-        self.numCooperators = [[0]*totalGenerations]*numParams
-        self.numDefectors = [[0]*totalGenerations]*numParams
-        
+    
+    def initialise_simulations(self):
+        if self.param == 'Population_Size':
+            for popSize in self.paramVals:
+                self.simulations.append(EvolutionSimulator(self.totalGenerations, popSize, self.gameIterations,\
+                    self.survivalRate, self.mutationSD, self.rewardCD, self.rewardDC, self.rewardCC,\
+                         self.rewardDD, self.agents))
 
 
     def strat_classifier(self, LT):
@@ -95,7 +93,7 @@ class EvolutionExperiments:
             self.print_lookupTables(lookupTables, i)
 
     def print_lookupTables(self, lookupTables, paramNum):
-        f = open('evolution_lookupTables.txt', 'a')
+        f = open(self.__class__.__name__+'_lookupTables'+'.txt', 'a')
         f.write('\n--------------------------\n\n')
         f.write(self.param+':'+str(self.paramVals[paramNum])+'\n')
         f.write('Population Size:'+str(self.totalAgents))
@@ -117,7 +115,7 @@ class EvolutionExperiments:
         
     
     def output_results(self, stateCounts, strategyCounts, rewards, paramNum):
-        f = open("evolution_results.txt", "a")
+        f = open(self.__class__.__name__+'_results'+'.txt', "a")
         
         f.write('\n')
         f.write('\n--------------------------\n\n')
