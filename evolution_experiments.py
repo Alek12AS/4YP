@@ -60,7 +60,8 @@ class EvolutionExperiments:
             lookupTables = []
             stateCounts = {'DC':[0]*self.totalGenerations,'CC':[0]*self.totalGenerations,\
             'DD':[0]*self.totalGenerations}
-            rewards = []
+            rewardMeans = []
+            rewardSDs = []
             strategyCount = {'cooperator':[0]*self.totalGenerations, 'defector':[0]*self.totalGenerations,\
                  'tit4tat':[0]*self.totalGenerations, 'other':[0]*self.totalGenerations}
 
@@ -83,13 +84,14 @@ class EvolutionExperiments:
                 stateCounts['DD'][genNum] = self.simulations[i].stateCount['DD']
                 
                 lookupTables.append(lt)
-                rewards.append(rwrds)
+                rewardMeans.append(np.mean(rwrds))
+                rewardSDs.append(np.std(rwrds))
                 
 
                 self.simulations[i].repopulate()
                 self.simulations[i].reset_measurements()
             
-            self.output_results(stateCounts, strategyCount, rewards, i)
+            self.output_results(stateCounts, strategyCount, rewardMeans, rewardSDs, i)
             self.print_lookupTables(lookupTables, i)
 
     def print_lookupTables(self, lookupTables, paramNum):
@@ -114,7 +116,7 @@ class EvolutionExperiments:
         f.close()
         
     
-    def output_results(self, stateCounts, strategyCounts, rewards, paramNum):
+    def output_results(self, stateCounts, strategyCounts, rewardMeans, rewardSDs, paramNum):
         f = open(self.__class__.__name__+'_results'+'.txt', "a")
         
         f.write('\n')
@@ -127,32 +129,33 @@ class EvolutionExperiments:
         f.write(' Game Iterations:'+str(self.gameIterations))
         f.write('\n\n--------------------------\n\n')
 
-        f.write('DC_Count: ')
+        f.write('DC_Count ')
         f.write(' '.join(map(str, stateCounts['DC'])))
         f.write('\n')
-        f.write('CC_Count: ')
+        f.write('CC_Count ')
         f.write(' '.join(map(str, stateCounts['CC'])))
         f.write('\n')
-        f.write('DD_Count: ')
+        f.write('DD_Count ')
         f.write(' '.join(map(str, stateCounts['DD'])))
         f.write('\n')
         
-        f.write('Number_of_Cooperators: ')
+        f.write('Number_of_Cooperators ')
         f.write(' '.join(map(str, strategyCounts['cooperator'])))
         f.write('\n')
-        f.write('Number_of_Defectors: ')
+        f.write('Number_of_Defectors ')
         f.write(' '.join(map(str, strategyCounts['defector'])))
         f.write('\n')
-        f.write('Number_of_Tit4Tat_Players: ')
+        f.write('Number_of_Tit4Tat_Players ')
         f.write(' '.join(map(str, strategyCounts['tit4tat'])))
         f.write('\n')
-        f.write('Other_Strategies: ')
+        f.write('Other_Strategies ')
         f.write(' '.join(map(str, strategyCounts['other'])))
         f.write('\n')
-        f.write('Agent_Rewards: ')
+        f.write('Agent_Reward_Means ')
+        f.write(' '.join(map(str, np.around(rewardMeans, decimals=1))))
         f.write('\n')
-        for i in range(self.totalGenerations):
-            f.write(str(i)+' '+' '.join(map(str, np.sort(np.around(rewards[i], decimals=1)))))
-            f.write('\n')
+        f.write('Agent_Reward_SDs ')
+        f.write(' '.join(map(str, np.around(rewardSDs, decimals=1))))
+        f.write('\n')
         f.close()
         

@@ -20,13 +20,13 @@ def main():
     # Qexp.obtain_results()
     # Qexp.output_results()
 
-    popSizes = [20]
+    popSizes = [100]
 
-    # evoExp = EvolutionExperiments(totalGenerations=10, paramVals=popSizes)
+    # evoExp = EvolutionExperiments(totalGenerations=100, paramVals=popSizes)
     # evoExp.obtain_results()
     # print("--- %s seconds ---" % (time.time() - startTime))
     
-    evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=10, paramVals=popSizes)
+    evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=1000, paramVals=popSizes)
     evoPlusQ.obtain_results()
     print("--- %s seconds ---" % (time.time() - startTime))
 
