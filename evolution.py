@@ -54,19 +54,23 @@ class EvolutionSimulator:
         # Sort by score
         self.agents.sort(reverse=True, key=lambda x:x.totalReward)
 
+        parentTables = []
+        for i in range(self.numOfSurvivors):
+            parentTables.append(self.agents[i].lookupTable.copy())
+
         for agent in self.agents:
             agent.totalReward = 0
 
-        for i in range(self.totalAgents-self.numOfSurvivors):
-            parents = np.random.choice(self.numOfSurvivors,2,False)
+        for i in range(self.totalAgents):
+            randIndices = np.random.choice(self.numOfSurvivors,2,False)
 
-            childlookupTable = self.crossover(self.agents[parents[0]], self.agents[parents[1]])
+            childlookupTable = self.crossover(parentTables[randIndices[0]], parentTables[randIndices[1]])
             self.mutate(childlookupTable)
 
-            self.agents[self.numOfSurvivors + i].lookupTable = childlookupTable
+            self.agents[i].lookupTable = childlookupTable
     
 
-    def crossover(self, parent1, parent2):
+    def crossover(self, parentTable1, parentTable2):
         childlookupTable = {'D': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0, '_': 0},\
                     'C': {'CC': 0, 'CD': 0, 'DC': 0, 'DD': 0, '_': 0}}
         
@@ -74,9 +78,9 @@ class EvolutionSimulator:
             for state in childlookupTable[action]:
                 sample = np.random.choice(2)
                 if sample == 1:
-                    childlookupTable[action][state] = parent1.lookupTable[action][state]
+                    childlookupTable[action][state] = parentTable1[action][state]
                 else:
-                    childlookupTable[action][state] = parent2.lookupTable[action][state]
+                    childlookupTable[action][state] = parentTable2[action][state]
 
         return childlookupTable
 
