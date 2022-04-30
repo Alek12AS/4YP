@@ -1,6 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+
 
 class Agent:
   
@@ -15,12 +14,11 @@ class Agent:
     # Keeps track of the iteration number for the agent
     self.its = its
 
-    self.TDEs = []
   
 
 class QLearningSimulator:
 
-  def __init__(self, totalAgents=100, gamma=0.99, alpha=0.1, gameIts=100, epsilon0=0.25,\
+  def __init__(self, totalAgents=100, gamma=0.99, alpha=0.1, gameIts=10, epsilon0=0.5,\
   epsilonDecay=0.9999,rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, agents=None):
     
     # number of agents N_a 
@@ -44,9 +42,6 @@ class QLearningSimulator:
     self.rewards_lookup = {'CD':rewardCD, 'DC':rewardDC, 'CC':rewardCC, 'DD':rewardDD}
     
     self.stateCount = {'DC':0,'CC':0,'DD':0}
-    self.agentSampleSize = 10
-    self.trackedAgents = np.random.choice(self.totalAgents, self.agentSampleSize, False)
-    self.samplePeriod = 10
     
     if agents == None:
       self.create_agents()
@@ -102,8 +97,9 @@ class QLearningSimulator:
     self.agents[agent1].lookupTable[agent1Decision][priorState] += deltaQ1
     self.agents[agent2].lookupTable[agent2Decision][priorState[-1::-1]] += deltaQ2
 
-    self.agents[agent1].TDEs.append(deltaQ1)
-    self.agents[agent2].TDEs.append(deltaQ2)
+  def repopulate(self):
+    for agent in self.agents:
+      agent.totalReward = 0
 
   def run_simulation(self):
     
@@ -135,12 +131,4 @@ class QLearningSimulator:
 
           priorState = newState
     
-  def get_mean_TDEs(self):
-    
-    sums = np.zeros(len(self.agents[0].TDEs))
-
-    for agent in self.agents:
-      sums = np.add(np.array(agent.TDEs),sums)
-
-    return np.divide(sums,self.totalAgents)
 

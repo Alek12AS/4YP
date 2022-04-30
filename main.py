@@ -7,28 +7,19 @@ import time
 
 def main():
     startTime = time.time()
-    # g1 = np.linspace(0,1,20,False)
-    # g2 = np.linspace(0.99,1,5,False)
-    # g3 = np.linspace(0.999,1,5,False)
-    # g4 = np.linspace(0.9999,1,5,False)
-
-    # gammaVals = np.concatenate((g1, g2, g3, g4))
     
-    # Qexp = QLearningExperiments(param='Gamma', paramVals=[0.99])
-
-    # Qexp.train_populations()
-    # Qexp.obtain_results()
-    # Qexp.output_results()
-
     popSizes = [50]
 
-    evoExp = EvolutionExperiments(totalGenerations=10, paramVals=popSizes)
-    evoExp.obtain_results()
-    print("--- %s seconds ---" % (time.time() - startTime))
+    Qexp = QLearningExperiments(paramVals=popSizes)
+    Qexp.obtain_results()
+
+    # evoExp = EvolutionExperiments(totalGenerations=100, paramVals=popSizes)
+    # evoExp.obtain_results()
     
-    # evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=1000, paramVals=popSizes)
+    # evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
     # evoPlusQ.obtain_results()
-    # print("--- %s seconds ---" % (time.time() - startTime))
+    
+    print("--- %s seconds ---" % (time.time() - startTime))
 
 if __name__ == "__main__":
     main()

@@ -139,13 +139,14 @@ class EvolutionExperiments:
   
     
     def output_results(self, stateCounts, strategyCounts, rewardMeans, rewardSDs, paramNum):
-        f = open('results_evolution/'+self.param+'_results.csv', "a", newline='')
+        f = open('results_' + self.__class__.__name__ +'/'+self.param+'_results.csv', "a", newline='')
         writer = csv.writer(f)
-        hyperParams = ['Population Size:'+str(self.totalAgents)+' Total Generations:'+str(self.totalGenerations)\
-             + ' Mutation SD:'+str(self.mutationSD)+ ' Survival Rate:'+str(self.survivalRate*100)+'%'\
-                  + ' Game Iterations:'+str(self.gameIterations)]
+        # hyperParams = ['Population Size:'+str(self.totalAgents)+' Total Generations:'+str(self.totalGenerations)\
+        #      + ' Mutation SD:'+str(self.mutationSD)+ ' Survival Rate:'+str(self.survivalRate*100)+'%'\
+        #           + ' Game Iterations:'+str(self.gameIterations)]
         
-        writer.writerow(hyperParams)
+        # writer.writerow(hyperParams)
+        writer.writerow([self.param + ':' + str(self.paramVals[paramNum])])
         writer.writerow(['Generation #'] + [i+1 for i in range(self.totalGenerations)])
         writer.writerow(['CC #'] + stateCounts['CC'])
         writer.writerow(['DC #'] + stateCounts['DC'])
