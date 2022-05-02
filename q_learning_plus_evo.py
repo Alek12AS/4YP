@@ -17,7 +17,9 @@ class QLearnPlusEvoSimulator(QLearningSimulator, EvolutionSimulator):
             self.numOfSurvivors = 2
 
         self.mutationSD = mutationSD
-        
+    
+    def repopulate(self):
+        EvolutionSimulator.repopulate(self)
         
     def run_simulation(self):
         QLearningSimulator.run_simulation(self)

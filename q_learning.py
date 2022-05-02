@@ -85,6 +85,10 @@ class QLearningSimulator:
   def reset_measurements(self):
     self.stateCount = {'DC':0,'CC':0,'DD':0}
 
+  def repopulate(self):
+    for agent in self.agents:
+      agent.totalReward = 0
+
 
   def update_lookup_tables(self, newState, priorState, agent1, agent2,\
                           agent1Decision, agent2Decision, agent1Reward, agent2Reward):
@@ -97,9 +101,6 @@ class QLearningSimulator:
     self.agents[agent1].lookupTable[agent1Decision][priorState] += deltaQ1
     self.agents[agent2].lookupTable[agent2Decision][priorState[-1::-1]] += deltaQ2
 
-  def repopulate(self):
-    for agent in self.agents:
-      agent.totalReward = 0
 
   def run_simulation(self):
     

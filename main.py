@@ -10,14 +10,14 @@ def main():
     
     popSizes = [50]
 
-    Qexp = QLearningExperiments(paramVals=popSizes)
-    Qexp.obtain_results()
+    # Qexp = QLearningExperiments(paramVals=popSizes)
+    # Qexp.obtain_results()
 
     # evoExp = EvolutionExperiments(totalGenerations=100, paramVals=popSizes)
     # evoExp.obtain_results()
     
-    # evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
-    # evoPlusQ.obtain_results()
+    evoPlusQ = QLearningPlusEvolutionExperiments(totalGenerations=100, paramVals=popSizes)
+    evoPlusQ.obtain_results()
     
     print("--- %s seconds ---" % (time.time() - startTime))
 
