@@ -5,7 +5,7 @@ class QLearningPlusEvolutionExperiments(EvolutionExperiments):
     
     def __init__(self, totalGenerations=100, param='Population_Size', paramVals=None, repetitions=1,\
          populationSize=100, gamma=0.99, alpha=0.1, gameIts=10, epsilon0=0.5, epsilonDecay=0.9999,\
-             rewardCD=0, rewardDC=0.5, rewardCC=0.3, rewardDD=0.1, survivalRate=0.05, mutationSD=2.5,\
+             rewardCD=0, rewardDC=0, rewardCC=0.3, rewardDD=0, survivalRate=0.05, mutationSD=2.5,\
                  agents=None):
 
         self.gamma = gamma
